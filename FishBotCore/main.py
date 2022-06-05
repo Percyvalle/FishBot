@@ -3,10 +3,12 @@ import time
 import cv2
 import numpy as np
 import pyautogui as pg
-import pytesseract as ts
+import pytesseract
+import keyboard as kb
 
 from mss.linux import MSS as mss
 import mss
+
 
 def find_patt(image, patt, thres):
     img_grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -16,23 +18,34 @@ def find_patt(image, patt, thres):
     loc = np.where(res > thres)
     return patt_H, patt_W, zip(*loc[::-1]), min_loc, max_loc
 
+
 def start():
     with mss.mss() as sct:
-        monitor = {"top": 100, "left":100, "width":1920, "height": 1080}
+        monitor = {"top": 100, "left":100, "width":500, "height": 500}
 
         image_fish = cv2.imread('res/fish.png', 0)
-        image_text = cv2.imread('res/catch_fish_text.jpg')
+
         while "Screen capturing":
             img = np.array(sct.grab(monitor))
 
-            h, w, points, min_loc, max_loc = find_patt(img, image_fish, 0.70)
+            h, w, points, min_loc, max_loc = find_patt(img, image_fish, 0.50)
             if len(list(points)) != 0:
                 if max_loc[0] > 960:
-                    #pg.press('a')
-                    pass
+                    print("Справа")
+                    #kb.press('a')
                 else:
-                    pass
-                    #pg.press('d')
+                    print("Слева")
+                    #kb.press('d')
+
+            # h2, w2, points2, min_loc2, max_loc2 = find_patt(img, image_text, 0.70)
+            # print(min_loc2)
+            # if len(list(points2)) != 0:
+            #     if max_loc2[0] > 960:
+            #         #pg.press('a')
+            #         print("Справа")
+            #     else:
+            #         #pg.press('d')
+            #         print("Слева")
 
 if __name__ == '__main__':
     start()
