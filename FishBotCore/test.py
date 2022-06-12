@@ -1,4 +1,3 @@
-import queue
 import sys
 import threading
 import cv2
@@ -7,11 +6,10 @@ import mouse
 from pynput.mouse import Button, Controller
 import queue as qu
 import numpy as np
-
-from mss.linux import MSS as mss
 import mss
 
 def find_fish():
+
     with mss.mss() as sct:
         monitor = {"top": 0, "left": 0, "width": 1920, "height": 1080}
 
@@ -31,14 +29,15 @@ def find_fish():
                     for pt in zip(*loc[::-1]):
                         if pt[0] >= 920:
                             print('Справа')
-                            keyboard.release('d')
-                            keyboard.press('a')
+                            # keyboard.release('d')
+                            # keyboard.press('a')
                         elif pt[0] < 920:
                             print('Слева')
-                            keyboard.release('a')
-                            keyboard.press('d')
+                            # keyboard.release('a')
+                            # keyboard.press('d')
 
 def find_text():
+
     mouse = Controller()
     with mss.mss() as sct:
         monitor = {"top": 780, "left": 1120, "width": 800, "height": 300}
@@ -55,14 +54,20 @@ def find_text():
                 loc = np.where(res > 0.7)
 
                 w, h = text.shape[::-1]
-                if len(list(zip(*loc[::-1]))) != 0:
-                    mouse.press(Button.left)
-                else:
-                    mouse.release(Button.left)
+                # if len(list(zip(*loc[::-1]))) != 0:
+                #     mouse.press(Button.left)
+                # else:
+                #     mouse.release(Button.left)
+
+            cv2.imshow('i', img)
+            ch = cv2.waitKey(27)
+            if ch == 'q':
+                cv2.destroyAllWindows()
+                break
 
 
 def hotkey():
-    keyboard.press_and_release('e')
+    # keyboard.press_and_release('e')
 
     th1 = threading.Thread(target=find_fish)
     th1.start()
@@ -78,3 +83,14 @@ if __name__ == "__main__":
     while True:
         if keyboard.is_pressed('ctrl+h'):
             hotkey()
+
+
+# def check_hotkeys():
+#     while True:
+#         if keyboard.is_pressed('q'):
+#             return True
+#         return False
+#
+# th1 = threading.Thread(target=check_hotkeys)
+# th1.start()
+# print(th1.)
