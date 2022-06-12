@@ -6,3 +6,5 @@ mss==6.1.0
 opencv-contrib-python==4.5.5.64
 mouse==0.7.1
 pynput==1.7.6
+Pillow==9.1.1
+six==1.16.0
