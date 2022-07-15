@@ -8,18 +8,6 @@ from sentence_transformers import SentenceTransformer, util
 import pytesseract
 
 
-# class StoppableThread(Thread):
-#
-#     def __init__(self, *args, **kwargs):
-#         super(StoppableThread, self).__init__(*args, **kwargs)
-#         self._stop_event = Event()
-#
-#     def stop(self):
-#         self._stop_event.set()
-#
-#     def stopped(self):
-#         return self._stop_event.is_set()
-
 
 class FishBot:
 
@@ -27,25 +15,6 @@ class FishBot:
 
         self.tf = self.TextFinder()
         self.ff = self.FishFinder()
-        # self.is_program_active = False
-        # self.text_finder_thread = None
-        # self.fish_finder_thread = None
-
-    # def check_button_pressed(self):
-    #     if keyboard.is_pressed('q') and not self.is_program_active:
-    #         self.is_program_active = True
-    #         self.text_finder_thread = StoppableThread(target=self.tf.start_text_finder())
-    #         self.fish_finder_thread = StoppableThread(target=self.ff.start_fish_finder())
-    #         self.text_finder_thread.start()
-    #         self.fish_finder_thread.start()
-    #         print("has started")
-    #         time.sleep(1)
-    #     if keyboard.is_pressed('q') and self.is_program_active:
-    #         self.is_program_active = False
-    #         self.text_finder_thread.stop()
-    #         self.fish_finder_thread.stop()
-    #         print("has stoped")
-    #         time.sleep(1)
 
     class TextFinder:
 

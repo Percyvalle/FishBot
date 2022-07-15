@@ -1,96 +1,43 @@
-import sys
-import threading
-import cv2
-import keyboard
-import mouse
-from pynput.mouse import Button, Controller
-import queue as qu
 import numpy as np
 import mss
-
-def find_fish():
-
-    with mss.mss() as sct:
-        monitor = {"top": 0, "left": 0, "width": 1920, "height": 1080}
-
-        while "Screen capturing":
-            if keyboard.is_pressed('q'):
-                return 0
-
-            img = np.array(sct.grab(monitor))
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-            for x in range(7):
-                fish = cv2.imread(f'res/fish_{x}.png', cv2.IMREAD_GRAYSCALE)
-                res = cv2.matchTemplate(img, fish, cv2.TM_CCOEFF_NORMED)
-                loc = np.where(res > 0.8)
-
-                if len(list(zip(*loc[::-1]))) != 0:
-                    for pt in zip(*loc[::-1]):
-                        if pt[0] >= 920:
-                            print('Справа')
-                            # keyboard.release('d')
-                            # keyboard.press('a')
-                        elif pt[0] < 920:
-                            print('Слева')
-                            # keyboard.release('a')
-                            # keyboard.press('d')
-
-def find_text():
-
-    mouse = Controller()
-    with mss.mss() as sct:
-        monitor = {"top": 780, "left": 1120, "width": 800, "height": 300}
-
-        while "Screen capturing":
-            if keyboard.is_pressed('q'):
-                return 0
-            img = np.array(sct.grab(monitor))
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-            for x in range(4):
-                text = cv2.imread(f'res/text_{x}.png', cv2.IMREAD_GRAYSCALE)
-                res = cv2.matchTemplate(img, text, cv2.TM_CCOEFF_NORMED)
-                loc = np.where(res > 0.7)
-
-                w, h = text.shape[::-1]
-                # if len(list(zip(*loc[::-1]))) != 0:
-                #     mouse.press(Button.left)
-                # else:
-                #     mouse.release(Button.left)
-
-            cv2.imshow('i', img)
-            ch = cv2.waitKey(27)
-            if ch == 'q':
-                cv2.destroyAllWindows()
-                break
-
-
-def hotkey():
-    # keyboard.press_and_release('e')
-
-    th1 = threading.Thread(target=find_fish)
-    th1.start()
-
-    th2 = threading.Thread(target=find_text)
-    th2.start()
-
-    th2.join()
-    sys.exit()
+import cv2
+import imutils
+import pyautogui
 
 
 if __name__ == "__main__":
-    while True:
-        if keyboard.is_pressed('ctrl+h'):
-            hotkey()
+    with mss.mss() as sct:
+        # monitor = {"top": 200, "left": 710, "width": 1920, "height": 600}
+        monitor = {"top": 150, "left": 0, "width": 1920, "height": 600}
+
+        while "Screen capturing":
+            img = np.array(sct.grab(monitor))
+            # img = cv2.imread("C:/Users/goman/Desktop/FishBot/FishBotCore/res/fish_find_1.jpg")
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            gray = cv2.GaussianBlur(gray, (7, 7), 0)
+            edges = cv2.Canny(gray, 100, 250)
 
 
-# def check_hotkeys():
-#     while True:
-#         if keyboard.is_pressed('q'):
-#             return True
-#         return False
-#
-# th1 = threading.Thread(target=check_hotkeys)
-# th1.start()
-# print(th1.)
+            kernel =  cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+            close = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+
+            cnts = cv2.findContours(close.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            cnts = imutils.grab_contours(cnts)
+
+            total = 0
+            for c in cnts:
+                p =  cv2.arcLength(c, True)
+                approx = cv2.approxPolyDP(c, p * 0.02, True)
+                if len(approx) == 4:
+                    cv2.drawContours(img, [approx], -1, (0, 255, 0), 4)
+                    total += 1
+
+                    M = cv2.moments(approx)
+                    if int(M['m10']) != 0 or int(M['m00']) != 0:
+                        cx = int(M['m10']/M['m00'])
+                    pyautogui.moveTo(cx, 100)
+
+            cv2.imshow('Name', img)
+            if cv2.waitKey(60) & 0xFF == ord("q"):
+                cv2.destroyAllWindows()
+                break
