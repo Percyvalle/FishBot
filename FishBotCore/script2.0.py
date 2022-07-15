@@ -33,7 +33,6 @@ class TextFinder:
         text_screen = self.screen_capture()
 
         while "Screen capturing":
-            await asyncio.sleep(1)
             text_image = self.window_grabber(screen=text_screen)
             recognized_sentence = self.sentence_recognizer(image=text_image)
             text_similarity = self.sentence_compare(sentence=recognized_sentence)
@@ -41,6 +40,7 @@ class TextFinder:
                 pass
             else:
                 pass
+            await asyncio.sleep(1)
 
     def window_grabber(self, screen):
         img = np.array(screen.grab(self.bottom_text_monitor))
@@ -81,7 +81,6 @@ class FishFinder():
 
         print("Start Searching For Fish")
         while "Screen capturing":
-            await asyncio.sleep(1)
             img = np.array(self.screen_capture().grab(self.search_area))
             for c in self.find_contours(img):
                 epsilon =  cv2.arcLength(c, True)
@@ -95,6 +94,7 @@ class FishFinder():
                             pass
                         else:
                             pass
+            await asyncio.sleep(1)
     
     def screen_capture(self):
         with mss.mss() as sct:
@@ -122,10 +122,10 @@ def start_fish():
 
 async def quit_bot():
     while True:
-        await asyncio.sleep(1)
         if keyboard.is_pressed('ctrl+k'):
             print("Exit")
             exit(1)
+        await asyncio.sleep(1)
 
 
 if __name__ == "__main__":
