@@ -23,16 +23,16 @@ class TextRecognition:
 
         text_screen = await self._screen_capture()
 
+        is_text_found = False
         while "Screen capturing":
             text_image = await self._window_grabber(screen=text_screen)
             recognized_sentence = await self._sentence_recognizer(image=text_image)
             is_text_correct = await self._sentence_compare(sentence=recognized_sentence.lower().strip("\n"))
             if is_text_correct:
                 print("Text: 1")
-                pass
-            else:
-                print("Text: 0")
-                pass
+                is_text_found = True
+            elif not is_text_correct and is_text_found:
+                raise TextFound
             await asyncio.sleep(0.1)
 
     async def _sentence_compare(self, sentence) -> bool:
@@ -65,16 +65,18 @@ class FishRecognition:
     def __init__(self, monitor_cfg: object):
         self._search_area = {"top": monitor_cfg.TOP, "left": monitor_cfg.LEFT,
                              "width": monitor_cfg.WIDTH, "height": monitor_cfg.HEIGHT}
+
         self._lvl_blur_left = 7
         self._lvl_blur_right = 7
         self._canny_lvl_max = 250
-        self._canny_lvl_mix = 240
+        self._canny_lvl_min = 240
 
-    async def start_fish_finder(self):
+    async def start_fish_finder(self) -> bool:
 
         print("Start Searching For Fish")
         screen = await self._screen_capture()
 
+        is_fish_caught = False
         while "Screen capturing":
             img = np.array(screen.grab(self._search_area))
             for c in await self._find_contours(img):
@@ -84,12 +86,17 @@ class FishRecognition:
                     m = cv2.moments(approx)
                     if int(m['m10']) != 0 or int(m['m00']) != 0:
                         cx = int(m['m10'] / m['m00'])
+                        is_fish_caught = True
                         if cx > 960:
                             print("Fish: 1")
                             pass
                         else:
                             print("Fish: 0")
                             pass
+                    elif int(m['m10']) != 0 or int(m['m00']) == 0 and is_fish_caught:
+                        return True
+                elif len(approx) < 4 and is_fish_caught:
+                    raise FishCaught
             await asyncio.sleep(0.2)
 
     @staticmethod
@@ -100,7 +107,7 @@ class FishRecognition:
     async def _find_contours(self, img) -> list:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (self._lvl_blur_left, self._lvl_blur_right), 0)
-        edges = cv2.Canny(gray, self._canny_lvl_mix, self._canny_lvl_max)
+        edges = cv2.Canny(gray, self._canny_lvl_min, self._canny_lvl_max)
 
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
         close = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
@@ -108,3 +115,10 @@ class FishRecognition:
         contour = cv2.findContours(close.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contour = imutils.grab_contours(contour)
         return contour
+
+
+class FishCaught(Exception):
+    pass
+
+class TextFound(Exception):
+    pass
