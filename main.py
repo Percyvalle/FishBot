@@ -1,6 +1,6 @@
 import asyncio
 from cfg import TextScreenCfg, PyTesseractCfg, CasesCfg, FishScreenCfg
-from src.recognition_core.recognition import TextRecognition, FishRecognition
+from src.recognition_core.recognition import TextRecognition, FishRecognition, FishCaught, TextFound
 import keyboard
 
 pytesseract_path = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
@@ -24,20 +24,23 @@ async def run():
         monitor_cfg=FishScreenCfg()
     )
     while True:
-        text_found = False
-        fish_found = False
+        keyboard.press("E")
 
-        while not fish_found:
+        while True:
             fish_task = asyncio.create_task(fr.start_fish_finder())
             wait_key = asyncio.create_task(wait_for_key())
-            fish_found = await asyncio.gather(fish_task)
-            await asyncio.gather(wait_key)
+            try:
+                await asyncio.gather(fish_task, wait_key)
+            except FishCaught:
+                break
 
-        while not text_found:
+        while True:
             text_task = asyncio.create_task(tr.start_text_finder())
             wait_key = asyncio.create_task(wait_for_key())
-            text_found = await asyncio.gather(text_task)
-            await asyncio.gather(wait_key)
+            try:
+                await asyncio.gather(text_task, wait_key)
+            except TextFound:
+                break
 
 
 def main():
