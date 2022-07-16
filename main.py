@@ -18,13 +18,12 @@ async def run():
     tr = TextRecognition(
         pytesseract_path=PyTesseractCfg(path=pytesseract_path).PYTESSERACT_PATH,
         monitor_cfg=TextScreenCfg(),
-        cases=CasesCfg.CASES
     )
     fr = FishRecognition(
         monitor_cfg=FishScreenCfg()
     )
 
-    text_find = asyncio.create_task(tr.start_text_finder())
+    text_find = asyncio.create_task(tr.start_text_finder(text_cases=CasesCfg.CASES))
     fish_find = asyncio.create_task(fr.start_fish_finder())
     wait_key = asyncio.create_task(wait_for_key())
 
@@ -32,4 +31,9 @@ async def run():
 
 
 if __name__ == "__main__":
+    is_program_started = False
+    print("Wait for the start")
+    while not is_program_started:
+        if keyboard.is_pressed('ctrl+k'):
+            is_program_started = True
     asyncio.run(run())
