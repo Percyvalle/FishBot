@@ -1,4 +1,5 @@
 import asyncio
+from mss.base import MSSBase
 from sentence_transformers import SentenceTransformer, util
 import pytesseract
 import numpy as np
@@ -9,19 +10,16 @@ import imutils
 
 class TextRecognition:
 
-    def __init__(self, pytesseract_path: str, monitor_cfg: object):
+    def __init__(self, pytesseract_path: str, monitor_cfg: object, text_cases: list):
         pytesseract.pytesseract.tesseract_cmd = pytesseract_path
-        self._model = None
-        self._encoded_cases = None
+        self._model = SentenceTransformer('all-MiniLM-L6-v2')
+        self._encoded_cases = self._model.encode(text_cases)
         self._bottom_text_monitor = {"top": monitor_cfg.TOP, "left": monitor_cfg.LEFT,
                                      "width": monitor_cfg.WIDTH, "height": monitor_cfg.HEIGHT}
 
-    async def start_text_finder(self, text_cases: list):
+    async def start_text_finder(self):
 
         print("Start Searching For Text")
-
-        self._model = SentenceTransformer('all-MiniLM-L6-v2')
-        self._encoded_cases = self._model.encode(text_cases)
 
         text_screen = await self._screen_capture()
 
@@ -37,7 +35,7 @@ class TextRecognition:
                 pass
             await asyncio.sleep(0.1)
 
-    async def _sentence_compare(self, sentence):
+    async def _sentence_compare(self, sentence) -> bool:
         encoded_sentence = self._model.encode(sentence)
         all_similarities = util.cos_sim(encoded_sentence, self._encoded_cases)
         for sim in all_similarities[0]:
@@ -46,18 +44,18 @@ class TextRecognition:
                 return True
         return False
 
-    async def _window_grabber(self, screen):
+    async def _window_grabber(self, screen) -> list:
         img = np.array(screen.grab(self._bottom_text_monitor))
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         return gray
 
     @staticmethod
-    async def _sentence_recognizer(image):
+    async def _sentence_recognizer(image) -> str:
         sentence = pytesseract.image_to_string(image, lang='rus')
         return sentence
 
     @staticmethod
-    async def _screen_capture():
+    async def _screen_capture() -> MSSBase:
         with mss.mss() as sct:
             return sct
 
@@ -95,11 +93,11 @@ class FishRecognition:
             await asyncio.sleep(0.2)
 
     @staticmethod
-    async def _screen_capture():
+    async def _screen_capture() -> MSSBase:
         with mss.mss() as sct:
             return sct
 
-    async def _find_contours(self, img):
+    async def _find_contours(self, img) -> list:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (self._lvl_blur_left, self._lvl_blur_right), 0)
         edges = cv2.Canny(gray, self._canny_lvl_mix, self._canny_lvl_max)
