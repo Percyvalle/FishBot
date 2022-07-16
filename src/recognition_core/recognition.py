@@ -65,8 +65,8 @@ class FishRecognition:
     def __init__(self, monitor_cfg: object):
         self._search_area = {"top": monitor_cfg.TOP, "left": monitor_cfg.LEFT,
                              "width": monitor_cfg.WIDTH, "height": monitor_cfg.HEIGHT}
-        self._lvl_blur_left = 8
-        self._lvl_blur_right = 8
+        self._lvl_blur_left = 7
+        self._lvl_blur_right = 7
         self._canny_lvl_max = 250
         self._canny_lvl_mix = 240
 
