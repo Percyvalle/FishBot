@@ -9,16 +9,20 @@ import imutils
 
 class TextRecognition:
 
-    def __init__(self, pytesseract_path: str, monitor_cfg: object, cases: list):
+    def __init__(self, pytesseract_path: str, monitor_cfg: object):
         pytesseract.pytesseract.tesseract_cmd = pytesseract_path
-        self._model = SentenceTransformer('all-MiniLM-L6-v2')
-        self._encoded_cases = self._model.encode(cases)
+        self._model = None
+        self._encoded_cases = None
         self._bottom_text_monitor = {"top": monitor_cfg.TOP, "left": monitor_cfg.LEFT,
                                      "width": monitor_cfg.WIDTH, "height": monitor_cfg.HEIGHT}
 
-    async def start_text_finder(self):
+    async def start_text_finder(self, text_cases: list):
 
         print("Start Searching For Text")
+
+        self._model = SentenceTransformer('all-MiniLM-L6-v2')
+        self._encoded_cases = self._model.encode(text_cases)
+
         text_screen = await self._screen_capture()
 
         while "Screen capturing":
