@@ -21,13 +21,13 @@ class TextRecognition:
 
         print("Start Searching For Text")
 
-        text_screen = await self._screen_capture()
+        text_screen = self._screen_capture()
 
         is_text_found = False
         while "Screen capturing":
-            text_image = await self._window_grabber(screen=text_screen)
-            recognized_sentence = await self._sentence_recognizer(image=text_image)
-            is_text_correct = await self._sentence_compare(sentence=recognized_sentence.lower().strip("\n"))
+            text_image = self._window_grabber(screen=text_screen)
+            recognized_sentence = self._sentence_recognizer(image=text_image)
+            is_text_correct = self._sentence_compare(sentence=recognized_sentence.lower().strip("\n"))
             if is_text_correct:
                 print("Text: 1")
                 is_text_found = True
@@ -35,7 +35,7 @@ class TextRecognition:
                 raise TextFound
             await asyncio.sleep(0.1)
 
-    async def _sentence_compare(self, sentence) -> bool:
+    def _sentence_compare(self, sentence) -> bool:
         encoded_sentence = self._model.encode(sentence)
         all_similarities = util.cos_sim(encoded_sentence, self._encoded_cases)
         for sim in all_similarities[0]:
@@ -44,18 +44,18 @@ class TextRecognition:
                 return True
         return False
 
-    async def _window_grabber(self, screen) -> list:
+    def _window_grabber(self, screen) -> list:
         img = np.array(screen.grab(self._bottom_text_monitor))
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         return gray
 
     @staticmethod
-    async def _sentence_recognizer(image) -> str:
+    def _sentence_recognizer(image) -> str:
         sentence = pytesseract.image_to_string(image, lang='rus')
         return sentence
 
     @staticmethod
-    async def _screen_capture() -> MSSBase:
+    def _screen_capture() -> MSSBase:
         with mss.mss() as sct:
             return sct
 
@@ -74,12 +74,12 @@ class FishRecognition:
     async def start_fish_finder(self) -> bool:
 
         print("Start Searching For Fish")
-        screen = await self._screen_capture()
+        screen = self._screen_capture()
 
         is_fish_caught = False
         while "Screen capturing":
             img = np.array(screen.grab(self._search_area))
-            for c in await self._find_contours(img):
+            for c in self._find_contours(img):
                 epsilon = cv2.arcLength(c, True)
                 approx = cv2.approxPolyDP(c, epsilon * 0.02, True)
                 if len(approx) == 4:
@@ -100,11 +100,11 @@ class FishRecognition:
             await asyncio.sleep(0.2)
 
     @staticmethod
-    async def _screen_capture() -> MSSBase:
+    def _screen_capture() -> MSSBase:
         with mss.mss() as sct:
             return sct
 
-    async def _find_contours(self, img) -> list:
+    def _find_contours(self, img) -> list:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (self._lvl_blur_left, self._lvl_blur_right), 0)
         edges = cv2.Canny(gray, self._canny_lvl_min, self._canny_lvl_max)
@@ -119,6 +119,7 @@ class FishRecognition:
 
 class FishCaught(Exception):
     pass
+
 
 class TextFound(Exception):
     pass

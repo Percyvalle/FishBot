@@ -30,19 +30,17 @@ async def run():
             fish_task = asyncio.create_task(fr.start_fish_finder())
             wait_key = asyncio.create_task(wait_for_key())
             try:
-                await asyncio.gather(fish_task)
+                await asyncio.gather(fish_task, wait_key)
             except FishCaught:
                 break
-            await asyncio.gather(wait_key)
 
         while True:
             text_task = asyncio.create_task(tr.start_text_finder())
             wait_key = asyncio.create_task(wait_for_key())
             try:
-                await asyncio.gather(text_task)
+                await asyncio.gather(text_task, wait_key)
             except TextFound:
                 break
-            await asyncio.gather(wait_key)
 
 
 def main():
