@@ -1,6 +1,7 @@
 import asyncio
 from cfg import TextScreenCfg, PyTesseractCfg, CasesCfg, FishScreenCfg
-from src.recognition_core.recognition import TextRecognition, FishRecognition, FishCaught, TextFound
+from src.recognition_core.recognition import FishRecognition, FishCaught
+from src.recognition_core.text_recognition import TextRecognition, TextFound
 import keyboard
 
 pytesseract_path = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
