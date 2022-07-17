@@ -9,7 +9,7 @@
 3) Open cmd and move to the project folder
 4) In cmd:
 
-```angular2html
+```shell
 pip install virtualenv
 virtualenv -p=3.8 venv
 .\venv\scripts\activate
@@ -18,7 +18,8 @@ cd fishbotcore
 python main.py
 ```
 
-5) To activate the script press "ctrl + h" in game
+5) To activate the script press `ctrl + h` in game
+6) To stop the script press `ctrl + k` in game
 
 ---
 
